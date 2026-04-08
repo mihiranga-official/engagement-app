@@ -1,0 +1,86 @@
+<div class="guest-wall-shell">
+  <section class="guest-wall-header">
+    <div class="header-content">
+      <h1>💬 Guest Wall</h1>
+      <p class="subtitle">Share your wishes, blessings, and celebration moments</p>
+    </div>
+  </section>
+
+  <section class="guest-wall-form">
+    <div class="form-container">
+      <h2>✨ Leave a Message</h2>
+      
+      <div *ngIf="currentUser()" class="message-input-wrapper">
+        <div class="user-info">
+          <span class="user-name">📝 Posting as {{ currentUser()!.name }}</span>
+        </div>
+
+        <form (ngSubmit)="postMessage()" class="message-form">
+          <textarea 
+            [(ngModel)]="newMessage"
+            name="message"
+            placeholder="Share your congratulations, blessings, or a special memory..."
+            class="message-textarea"
+            rows="4"
+            maxlength="500"
+            required>
+          </textarea>
+
+          <div class="form-footer">
+            <span class="char-count">{{ newMessage.length }} / 500</span>
+            <button 
+              type="submit"
+              class="submit-btn"
+              [disabled]="isPosting || !newMessage.trim()">
+              {{ isPosting ? '⏳ Posting...' : '✓ Post Message' }}
+            </button>
+          </div>
+        </form>
+
+        <div class="form-note">
+          <p>💡 Your message will be reviewed by the hosts and displayed once approved.</p>
+        </div>
+      </div>
+
+      <div *ngIf="!currentUser()" class="login-prompt">
+        <p>Please log in to leave a message on the guest wall.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="guest-wall-messages">
+    <div class="messages-header">
+      <h2>Wall of Wishes</h2>
+      <p class="messages-subtitle">All approved messages from our guests</p>
+    </div>
+
+    <div class="messages-container" *ngIf="messages$ | async as messages">
+      <div *ngIf="messages.length === 0" class="no-messages">
+        <p>📭 No messages yet. Be the first to share your wishes!</p>
+      </div>
+
+      <div class="messages-grid">
+        <div class="message-card" *ngFor="let message of messages">
+          <div class="message-card-header">
+            <div class="message-user">
+              <div class="user-avatar">{{ message.userName.charAt(0).toUpperCase() }}</div>
+              <div class="user-details">
+                <strong>{{ message.userName }}</strong>
+                <small>{{ message.createdAt | date:'short' }}</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="message-card-body">
+            <p>{{ message.message }}</p>
+          </div>
+
+          <div class="message-card-footer">
+            <span class="approved-badge">✓ Approved</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+

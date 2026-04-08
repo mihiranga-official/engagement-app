@@ -1,0 +1,43 @@
+<section class="gallery-shell">
+  <div class="gallery-header">
+    <div>
+      <p class="eyebrow">Curated Gallery</p>
+      <h1>Approved photos from the celebration</h1>
+      <p>Photos are reviewed by admin before they appear here.</p>
+    </div>
+    <div class="upload-panel">
+      <label class="upload-button" for="upload-input">📤 Upload Photo</label>
+      <input #fileInput id="upload-input" type="file" accept="image/*" (change)="onFileSelected($event)" [disabled]="uploading()" />
+      <p class="upload-text">{{ uploadState() || 'Select a photo to begin.' }}</p>
+    </div>
+  </div>
+
+  <div class="gallery-grid" *ngIf="approvedPhotos$ | async as photos">
+    <div class="photos-container" *ngIf="photos.length; else emptyState">
+      <div class="photo-card" *ngFor="let photo of photos">
+        <img [src]="photo.url" alt="Approved photo" (load)="trackView(photo)" />
+        <div class="photo-info">
+          <div>
+            <strong>{{ photo.uploadedBy }}</strong>
+            <span>{{ photo.viewsCount }} views · {{ photo.likesCount }} likes</span>
+          </div>
+          <div class="photo-actions">
+            <!-- View button removed, likes remain -->
+            <button type="button" [class.liked]="hasLiked(photo)" (click)="likePhoto(photo)">
+              {{ hasLiked(photo) ? '❤️ Liked' : '🤍 Like' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <p>📭 No approved photos are available yet.</p>
+      <p class="empty-hint">Once admin approves photos from the gallery, they'll appear here.</p>
+      <a routerLink="/admin" class="ghost-link">📋 Open admin panel</a>
+    </div>
+  </ng-template>
+</section>
+

@@ -1,0 +1,31 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "users": {
+      ".indexOn": ["email"],
+      "$userId": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid == $userId"
+      }
+    },
+    "photos": {
+      ".indexOn": ["status", "uploaderUid", "createdAt"],
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "guest_wall_messages": {
+      ".indexOn": ["status", "createdAt", "userId"],
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$messageId": {
+        ".validate": "newData.hasChildren(['userId', 'userName', 'message', 'createdAt', 'status'])"
+      }
+    },
+    "activity_logs": {
+      ".indexOn": ["userId", "timestamp"],
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

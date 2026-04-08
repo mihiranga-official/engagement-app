@@ -1,0 +1,204 @@
+<div class="admin-shell">
+  <header class="admin-header">
+    <div class="header-content">
+      <h1>⚙️ Admin Moderation Dashboard</h1>
+      <p class="subtitle">Manage photos, messages, and analytics</p>
+    </div>
+
+    <nav class="admin-tabs">
+      <button 
+        class="tab-button"
+        [class.active]="activeTab() === 'photos'"
+        (click)="switchTab('photos')">
+        📸 Photos <span class="badge">{{ totalPhotos() }}</span>
+      </button>
+      <button 
+        class="tab-button"
+        [class.active]="activeTab() === 'messages'"
+        (click)="switchTab('messages')">
+        💬 Messages <span class="badge">{{ totalMessages() }}</span>
+      </button>
+      <button 
+        class="tab-button"
+        [class.active]="activeTab() === 'analytics'"
+        (click)="switchTab('analytics')">
+        📊 Analytics
+      </button>
+    </nav>
+  </header>
+
+  <!-- PHOTO MODERATION TAB -->
+  <section class="tab-content" *ngIf="activeTab() === 'photos'">
+    <div class="moderation-stats">
+      <div class="stat-card">
+        <h3>Pending Photos</h3>
+        <p class="stat-value">{{ totalPhotos() }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Approved Photos</h3>
+        <p class="stat-value">{{ approvedPhotosCount() }}</p>
+      </div>
+    </div>
+
+    <div class="moderation-section">
+      <h2>Pending Photos for Review</h2>
+      
+      <div class="photos-grid" *ngIf="(pendingPhotos$ | async) as photos">
+        <div *ngIf="photos.length === 0" class="empty-state">
+          <p>✅ No pending photos. Great work!</p>
+        </div>
+
+        <div class="photo-card" *ngFor="let photo of photos">
+          <div class="photo-preview">
+            <img [src]="photo.url" alt="Photo by {{ photo.uploadedBy }}" />
+          </div>
+
+          <div class="photo-details">
+            <div class="photo-meta">
+              <strong>{{ photo.uploadedBy }}</strong>
+              <small>{{ photo.createdAt | date:'short' }}</small>
+            </div>
+
+            <div class="photo-actions">
+              <button class="btn btn-success" (click)="approvePhoto(photo)">✓ Approve</button>
+              <button class="btn btn-danger" (click)="rejectPhoto(photo)">✕ Reject</button>
+              <button class="btn btn-secondary" (click)="togglePin(photo)">📌 Pin</button>
+              <button class="btn btn-danger" (click)="deletePhoto(photo)">🗑 Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="moderation-section">
+      <h2>Approved Photos</h2>
+      <div class="photos-grid" *ngIf="(approvedPhotos$ | async) as photos">
+        <div *ngIf="photos.length === 0" class="empty-state">
+          <p>No approved photos yet.</p>
+        </div>
+
+        <div class="photo-card approved" *ngFor="let photo of photos">
+          <div class="photo-preview">
+            <img [src]="photo.url" alt="Photo by {{ photo.uploadedBy }}" />
+            <span class="pinned-badge" *ngIf="photo.pinned">📌 FEATURED</span>
+          </div>
+
+          <div class="photo-details">
+            <div class="photo-stats">
+              <span>👁 {{ photo.viewsCount }} views</span>
+              <span>❤ {{ photo.likesCount }} likes</span>
+            </div>
+
+            <div class="photo-actions">
+              <button class="btn btn-secondary" (click)="togglePin(photo)">
+                {{ photo.pinned ? 'Unpin' : 'Pin' }}
+              </button>
+              <button class="btn btn-danger" (click)="deletePhoto(photo)">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MESSAGE MODERATION TAB -->
+  <section class="tab-content" *ngIf="activeTab() === 'messages'">
+    <div class="moderation-stats">
+      <div class="stat-card">
+        <h3>Pending Messages</h3>
+        <p class="stat-value">{{ totalMessages() }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Approved Messages</h3>
+        <p class="stat-value">{{ approvedMessagesCount() }}</p>
+      </div>
+    </div>
+
+    <div class="moderation-section">
+      <h2>Pending Guest Wall Messages</h2>
+
+      <div class="messages-list" *ngIf="(pendingMessages$ | async) as messages">
+        <div *ngIf="messages.length === 0" class="empty-state">
+          <p>✅ No pending messages. Great work!</p>
+        </div>
+
+        <div class="message-card" *ngFor="let message of messages">
+          <div class="message-header">
+            <strong>{{ message.userName }}</strong>
+            <small>{{ message.createdAt | date:'short' }}</small>
+          </div>
+
+          <div class="message-body">
+            <p>{{ message.message }}</p>
+          </div>
+
+          <div class="message-actions">
+            <button class="btn btn-success" (click)="approveMessage(message)">✓ Approve</button>
+            <button class="btn btn-danger" (click)="rejectMessage(message)">✕ Reject</button>
+            <button class="btn btn-danger" (click)="deleteMessage(message)">🗑 Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="moderation-section">
+      <h2>Approved Messages</h2>
+      <div class="messages-list" *ngIf="(approvedMessages$ | async) as messages">
+        <div *ngIf="messages.length === 0" class="empty-state">
+          <p>No approved messages yet.</p>
+        </div>
+
+        <div class="message-card approved" *ngFor="let message of messages">
+          <div class="message-header">
+            <strong>{{ message.userName }}</strong>
+            <small>{{ message.createdAt | date:'short' }}</small>
+          </div>
+
+          <div class="message-body">
+            <p>{{ message.message }}</p>
+          </div>
+
+          <div class="message-actions">
+            <button class="btn btn-danger" (click)="deleteMessage(message)">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANALYTICS TAB -->
+  <section class="tab-content" *ngIf="activeTab() === 'analytics'">
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <h3>📸 Total Photos</h3>
+        <p class="stat-value">{{ approvedPhotosCount() }}</p>
+        <small>approved and public</small>
+      </div>
+
+      <div class="analytics-card">
+        <h3>💬 Total Messages</h3>
+        <p class="stat-value">{{ approvedMessagesCount() }}</p>
+        <small>approved and public</small>
+      </div>
+
+      <div class="analytics-card">
+        <h3>⏳ Pending Review</h3>
+        <p class="stat-value">{{ totalPhotos() + totalMessages() }}</p>
+        <small>photos and messages waiting</small>
+      </div>
+
+      <div class="analytics-card">
+        <h3>✅ Approval Rate</h3>
+        <p class="stat-value">
+          {{ approvedPhotosCount() + approvedMessagesCount() }} / {{ approvedPhotosCount() + approvedMessagesCount() + totalPhotos() + totalMessages() }}
+        </p>
+        <small>content approved</small>
+      </div>
+    </div>
+
+    <div class="analytics-info">
+      <p>Analytics tracking page views, likes, and user engagement metrics in real-time.</p>
+    </div>
+  </section>
+</div>
+

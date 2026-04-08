@@ -1,0 +1,65 @@
+<section class="dashboard-hero">
+  <div class="hero-card">
+    <div class="hero-copy">
+      <p class="eyebrow">Engagement Celebration</p>
+      <h1>July 30 · Janith & Shashika</h1>
+      <!-- <p class="intro">Private guest experience with photo uploads, real-time guest wall, and admin moderation.</p> -->
+
+      <div class="hero-meta">
+        <div>
+          <span>Countdown</span>
+          <strong>{{ countdown() }}</strong>
+        </div>
+        <div>
+          <span>Guests online</span>
+          <strong>{{ activeUserCount$ | async }}</strong>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <a routerLink="/gallery" class="button button-secondary">View Gallery</a>
+        <a routerLink="/guest-wall" class="button button-primary">Guest Wall</a>
+      </div>
+    </div>
+
+    <div class="hero-details">
+      <div class="detail-card">
+        <h2>Venue</h2>
+        <p>Rosewood Estate, Sunset Ballroom</p>
+      </div>
+      <div class="detail-card">
+        <h2>Event Time</h2>
+        <p>July 30 · 6:00 PM</p>
+      </div>
+      <div class="detail-card">
+        <h2>Current mood</h2>
+        <p>Gold, white, blush, and celebration.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-image-card">
+    <img src="/couple-hero.png" alt="Happy Couple" />
+  </div>
+</section>
+
+<section class="featured-section" *ngIf="approvedFeaturedPhotos() as featuredPhotos">
+  <div class="section-header">
+    <!-- <h2>Featured Moments</h2>
+    <p>Only approved photos show here after admin review.</p> -->
+  </div>
+
+  <div class="featured-grid" *ngIf="featuredPhotos.length; else noFeatured">
+    <div class="featured-card" *ngFor="let photo of featuredPhotos | slice:0:4">
+      <img [src]="photo.url" alt="Featured photo" />
+      <div class="photo-meta">
+        <span>{{ photo.uploadedBy }}</span>
+        <strong>{{ photo.viewsCount }} views</strong>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noFeatured>
+    <!-- <p class="empty-state">No featured photos are approved yet. Check back soon.</p> -->
+  </ng-template>
+</section>
