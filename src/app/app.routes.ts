@@ -23,5 +23,9 @@ export const routes: Routes = [
         path: 'login',
         loadComponent: () => import('./core/auth/login/login.component').then(m => m.LoginComponent)
     },
+    {
+        path: 'invite',
+        loadComponent: () => import('./features/invitation/invitation.component').then(m => m.InvitationComponent)
+    },
     { path: '**', redirectTo: '' }
 ];

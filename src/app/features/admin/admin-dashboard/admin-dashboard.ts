@@ -21,7 +21,9 @@ export class AdminDashboardComponent implements OnDestroy {
   private guestWallService = inject(GuestWallService);
   private activityService = inject(ActivityService);
 
-  activeTab = signal<'photos' | 'messages' | 'analytics'>('photos');
+  activeTab = signal<'photos' | 'messages' | 'analytics' | 'invites'>('photos');
+  guestNameInput = signal('');
+  generatedLink = signal('');
   pendingPhotos$: Observable<PhotoRecord[]> = this.photoService.pendingPhotos$;
   pendingMessages$: Observable<GuestWallMessage[]> = this.guestWallService.pendingMessages$;
   approvedPhotos$: Observable<PhotoRecord[]> = this.photoService.approvedPhotos$;
@@ -154,7 +156,21 @@ export class AdminDashboardComponent implements OnDestroy {
     }
   }
 
-  switchTab(tab: 'photos' | 'messages' | 'analytics') {
+  switchTab(tab: 'photos' | 'messages' | 'analytics' | 'invites') {
     this.activeTab.set(tab);
+  }
+
+  generateLink() {
+    const name = this.guestNameInput().trim();
+    if (!name) return;
+    const baseUrl = `${window.location.origin}/invite`;
+    const encodedName = encodeURIComponent(name);
+    this.generatedLink.set(`${baseUrl}?name=${encodedName}`);
+  }
+
+  copyToClipboard() {
+    if (this.generatedLink()) {
+      navigator.clipboard.writeText(this.generatedLink());
+    }
   }
 }

@@ -24,6 +24,12 @@
         (click)="switchTab('analytics')">
         📊 Analytics
       </button>
+      <button 
+        class="tab-button"
+        [class.active]="activeTab() === 'invites'"
+        (click)="switchTab('invites')">
+        ✉️ Invitations
+      </button>
     </nav>
   </header>
 
@@ -198,6 +204,49 @@
 
     <div class="analytics-info">
       <p>Analytics tracking page views, likes, and user engagement metrics in real-time.</p>
+    </div>
+  </section>
+
+  <!-- INVITATIONS GENERATOR TAB -->
+  <section class="tab-content" *ngIf="activeTab() === 'invites'">
+    <div class="moderation-section">
+      <h2>✉️ Generate Guest Invitation Link</h2>
+      
+      <div class="invite-generator-card">
+        <p class="description-text">Enter the guest's name below to generate a personalized digital invitation URL link dynamically.</p>
+        
+        <div class="input-group-invite">
+          <label for="guestName" class="input-label">Guest Name</label>
+          <input 
+            type="text" 
+            id="guestName" 
+            [ngModel]="guestNameInput()"
+            (ngModelChange)="guestNameInput.set($event)"
+            placeholder="e.g. Mr. and Mrs. Perera"
+            class="form-control-input"
+          />
+        </div>
+
+        <button 
+          class="btn btn-primary" 
+          [disabled]="!guestNameInput().trim()"
+          (click)="generateLink()">
+          ✨ Generate Link
+        </button>
+
+        <div class="generated-result" *ngIf="generatedLink()">
+          <h4>Personalized Invitation Link:</h4>
+          <div class="url-copy-box">
+            <span class="url-text">{{ generatedLink() }}</span>
+            <button class="btn btn-secondary btn-copy" (click)="copyToClipboard()">
+              📋 Copy Link
+            </button>
+          </div>
+          <p class="preview-note">
+            👉 <a [href]="generatedLink()" target="_blank" class="preview-link">Click here to preview the invitation</a>
+          </p>
+        </div>
+      </div>
     </div>
   </section>
 </div>
