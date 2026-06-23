@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -35,30 +35,42 @@ import { map } from 'rxjs/operators';
         </div>
       </div>
 
-      <!-- Premium Quick Action Buttons (RSVP & Google Maps Location) -->
-      <div class="w-full max-w-[500px] mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 z-10 animate-fade-in-delayed">
-        <!-- Google Maps Button -->
-        <a 
-          href="https://maps.google.com/?q=Arangala+Forest+Lodge+Hotel+Naula" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          class="flex-1 bg-white hover:bg-[#fafbfb] text-[#2c4e35] border border-[#2c4e35]/20 font-medium py-3.5 px-6 rounded-2xl transition duration-300 ease-out shadow-sm flex items-center justify-center gap-2 text-center"
+      <!-- Premium Quick Action Buttons (RSVP, Google Maps Location & Download) -->
+      <div class="w-full max-w-[500px] mt-6 flex flex-col gap-3.5 z-10 animate-fade-in-delayed">
+        <!-- Download Invitation Card Button -->
+        <button 
+          (click)="downloadCard()" 
+          [disabled]="isDownloading()"
+          style="background: #c5a02b; color: white; border: none;"
+          class="w-full hover:opacity-90 disabled:opacity-50 font-bold py-4 px-6 rounded-2xl transition duration-300 ease-out shadow-md flex items-center justify-center gap-2 text-center cursor-pointer"
         >
-          📍 View on Google Maps
-        </a>
-        
-        <!-- Call RSVP Button -->
-        <a 
-          href="tel:+94756534407" 
-          class="flex-1 bg-[#2c4e35] hover:bg-[#203a27] text-white font-medium py-3.5 px-6 rounded-2xl transition duration-300 ease-out shadow-md flex items-center justify-center gap-2 text-center"
-        >
-          📞 RSVP: Call Janith
-        </a>
+          {{ isDownloading() ? '⌛ Generating Invitation...' : '📥 Download Invitation Card' }}
+        </button>
+
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <!-- Google Maps Button -->
+          <a 
+            href="https://maps.google.com/?q=Arangala+Forest+Lodge+Hotel+Naula" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="flex-1 bg-white hover:bg-[#fafbfb] text-[#2c4e35] border border-[#2c4e35]/20 font-medium py-3.5 px-6 rounded-2xl transition duration-300 ease-out shadow-sm flex items-center justify-center gap-2 text-center"
+          >
+            📍 View on Google Maps
+          </a>
+          
+          <!-- Call RSVP Button -->
+          <a 
+            href="tel:+94756534407" 
+            class="flex-1 bg-[#2c4e35] hover:bg-[#203a27] text-white font-medium py-3.5 px-6 rounded-2xl transition duration-300 ease-out shadow-md flex items-center justify-center gap-2 text-center"
+          >
+            📞 RSVP: Call Janith
+          </a>
+        </div>
       </div>
     </div>
   `,
   styles: [`
-    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap');
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(30px); }
@@ -108,4 +120,74 @@ export class InvitationComponent {
     ),
     { initialValue: 'Our Valued Guest' }
   );
+
+  protected isDownloading = signal(false);
+
+  async downloadCard() {
+    if (this.isDownloading()) return;
+    this.isDownloading.set(true);
+
+    try {
+      const guestName = this.guestName();
+      const imgUrl = '/Janith & shashika.jpg.jpeg';
+
+      // Load image programmatically
+      const img = new Image();
+      img.crossOrigin = 'anonymous'; // Enable CORS if hosted elsewhere in the future
+      
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = (err) => reject(err);
+        img.src = imgUrl;
+      });
+
+      // Create canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        throw new Error('Could not get 2D context from canvas');
+      }
+
+      // Draw image
+      ctx.drawImage(img, 0, 0);
+
+      // Setup typography
+      // Font size proportional to image width (5.2% of canvas width matches 6.5cqw on screen height scaling)
+      const fontSize = canvas.width * 0.052; 
+      
+      // Ensure the font is loaded in the document
+      await document.fonts.ready;
+
+      ctx.font = `500 ${fontSize}px "Dancing Script", cursive`;
+      ctx.fillStyle = '#0f3ba2'; // Guest name color
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // The Y coordinate dotted line is exactly at 48% height
+      // The X coordinate is centered (50% width)
+      const textX = canvas.width / 2;
+      const textY = canvas.height * 0.48;
+
+      // Draw guest name
+      ctx.fillText(guestName, textX, textY);
+
+      // Trigger download
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `Invitation_${guestName.replace(/\s+/g, '_')}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+    } catch (error) {
+      console.error('Error generating invitation card download:', error);
+      alert('Failed to generate invitation card. Please try again.');
+    } finally {
+      this.isDownloading.set(false);
+    }
+  }
 }
