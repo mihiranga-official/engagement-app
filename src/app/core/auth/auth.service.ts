@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Auth, authState, signInWithPopup, GoogleAuthProvider, signInAnonymously, signOut, updateProfile } from '@angular/fire/auth';
-import { Database, ref, set, get, update, onValue, off } from '@angular/fire/database';
+import { Database, ref, set, get, update, onValue, off, onDisconnect } from '@angular/fire/database';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
@@ -26,6 +26,8 @@ export class AuthService {
   private activityService = inject(ActivityService);
 
   private sessionTimer: any;
+  private activePresenceUid: string | null = null;
+  private connectedListenerUnsubscribe: (() => void) | null = null;
   private readonly MAX_SESSION_MS = 2 * 60 * 60 * 1000; // 2 hours
 
   // Expose current user as a signal for modern Angular change detection
@@ -96,8 +98,12 @@ export class AuthService {
           return;
         }
         this.startSessionLimitTimer();
+        if (appUser.uid) {
+          this.setupPresence(appUser.uid);
+        }
       } else {
         this.stopSessionLimitTimer();
+        this.cleanupPresence();
       }
 
       this.currentUser.set(appUser);
@@ -219,6 +225,7 @@ export class AuthService {
 
   async logout() {
     try {
+      this.cleanupPresence();
       localStorage.removeItem('sessionStartStr');
       this.stopSessionLimitTimer();
       
@@ -261,5 +268,47 @@ export class AuthService {
       // User might not exist yet
       console.warn('Could not update user presence:', e);
     }
+  }
+
+  private setupPresence(uid: string) {
+    if (this.activePresenceUid === uid) {
+      return; // Already set up for this user
+    }
+    
+    // Clean up previous listener if any
+    this.cleanupPresence();
+    
+    this.activePresenceUid = uid;
+    const userRef = ref(this.database, `users/${uid}`);
+    const connectedRef = ref(this.database, '.info/connected');
+
+    const unsubscribe = onValue(connectedRef, (snap) => {
+      if (snap.val() === true) {
+        // We are connected (or reconnected)!
+        // Set isOnline to true
+        update(userRef, {
+          isOnline: true,
+          lastActive: Date.now()
+        }).catch(err => console.warn('Could not update user presence:', err));
+
+        // When we disconnect, set isOnline to false
+        const presenceRef = ref(this.database, `users/${uid}/isOnline`);
+        onDisconnect(presenceRef).set(false).catch(err => console.warn('Could not set onDisconnect:', err));
+      }
+    });
+
+    this.connectedListenerUnsubscribe = () => off(connectedRef, 'value', unsubscribe);
+  }
+
+  private cleanupPresence() {
+    if (this.connectedListenerUnsubscribe) {
+      try {
+        this.connectedListenerUnsubscribe();
+      } catch (e) {
+        // Ignore if already unregistered
+      }
+      this.connectedListenerUnsubscribe = null;
+    }
+    this.activePresenceUid = null;
   }
 }

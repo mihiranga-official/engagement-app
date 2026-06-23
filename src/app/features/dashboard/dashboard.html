@@ -43,6 +43,26 @@
   </div>
 </section>
 
+<!-- Location Map Section -->
+<section class="map-section">
+  <div class="map-card">
+    <h2>📍 Location Map</h2>
+    <div class="map-wrapper">
+      <iframe 
+        [src]="mapUrl" 
+        width="100%" 
+        height="350" 
+        style="border:0;" 
+        allowfullscreen="" 
+        loading="lazy" 
+        referrerpolicy="no-referrer-when-downgrade"
+      ></iframe>
+      <!-- Glowing Circle Overlay highlighting Arangala Forest Lodge area -->
+      <div class="map-highlight-circle"></div>
+    </div>
+  </div>
+</section>
+
 <section class="featured-section" *ngIf="approvedFeaturedPhotos() as featuredPhotos">
   <div class="section-header">
     <!-- <h2>Featured Moments</h2>

@@ -20,7 +20,7 @@ import { map } from 'rxjs/operators';
         <!-- Invitation Card Image Container -->
         <div class="relative w-full aspect-[3/4.2] rounded-2xl overflow-hidden shadow-inner invite-card-container">
           <img 
-            src="/invitation-card.jpg" 
+            src="/Janith & shashika.jpg.jpeg" 
             alt="Engagement Invitation of Sashika and Janith" 
             class="w-full h-full object-cover block"
           />
@@ -79,14 +79,14 @@ import { map } from 'rxjs/operators';
 
     /* Guest Name Overlay Positioned exactly on the dotted line in the invitation image */
     .guest-name-overlay {
-position: absolute;
-    top: 49.8%;
+    position: absolute;
+    top: 48%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 76%;
     text-align: center;
     font-family: "Dancing Script", cursive;
-    font-size: 6.5cqw;
+    font-size: 5cqw;
     color: #0f3ba2;
     font-weight: 500;
     white-space: nowrap;

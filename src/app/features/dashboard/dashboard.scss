@@ -185,9 +185,76 @@ h1 {
   color: #64748b;
 }
 
+.map-section {
+  padding: 0 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.map-card {
+  background: white;
+  border-radius: 28px;
+  padding: 2rem;
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.08);
+  display: grid;
+  gap: 1.25rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+}
+
+.map-wrapper {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
+  line-height: 0;
+
+  iframe {
+    width: 100%;
+    display: block;
+  }
+}
+
+.map-highlight-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px;
+  height: 180px;
+  border: 3px dashed #2c4e35; // Theme green color
+  border-radius: 50%;
+  background: rgba(44, 78, 53, 0.12); // Semi-transparent theme green fill
+  pointer-events: none; // Allows interacting with the underlying map
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.6), inset 0 0 20px rgba(44, 78, 53, 0.25);
+  animation: pulse-circle 2.5s infinite ease-in-out;
+  z-index: 10;
+}
+
+@keyframes pulse-circle {
+  0% {
+    transform: translate(-50%, -50%) scale(0.95);
+    box-shadow: 0 0 0 0px rgba(44, 78, 53, 0.3), inset 0 0 10px rgba(44, 78, 53, 0.2);
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow: 0 0 0 12px rgba(44, 78, 53, 0), inset 0 0 20px rgba(44, 78, 53, 0.1);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.95);
+    box-shadow: 0 0 0 0px rgba(44, 78, 53, 0), inset 0 0 10px rgba(44, 78, 53, 0.2);
+  }
+}
+
 @media (min-width: 1024px) {
   .dashboard-hero {
     grid-template-columns: 2fr 1fr;
-    align-items: start;
+    align-items: stretch;
   }
 }

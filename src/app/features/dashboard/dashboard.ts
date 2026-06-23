@@ -1,5 +1,6 @@
 import { Component, inject, OnDestroy, OnInit, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer } from '@angular/platform-browser';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService, AppUser } from '../../core/auth/auth.service';
 import { Database, ref, onValue, off } from '@angular/fire/database';
@@ -8,6 +9,7 @@ import { map } from 'rxjs/operators';
 import { PhotoService, PhotoRecord } from '../../core/services/photo.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import confetti from 'canvas-confetti';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,11 +23,17 @@ export class DashboardComponent implements OnDestroy, OnInit {
   private router = inject(Router);
   private database = inject(Database);
   private photoService = inject(PhotoService);
+  private sanitizer = inject(DomSanitizer);
+
+  protected readonly mapUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+    'https://maps.google.com/maps?q=Arangala%20Forest%20Lodge,%20Naula&z=15&output=embed'
+  );
 
   protected galleryEnabled = toSignal(this.photoService.galleryEnabled$, { initialValue: true });
 
   protected isAdmin() {
-    return this.authService.currentUser()?.email === 'janithgunawardana98@gmail.com';
+    const user = this.authService.currentUser();
+    return !!user && (user.role === 'admin' || (user.email && environment.adminEmails.includes(user.email)));
   }
 
   protected showGalleryButton() {
@@ -38,7 +46,8 @@ export class DashboardComponent implements OnDestroy, OnInit {
       const users: AppUser[] = [];
       snapshot.forEach((childSnapshot) => {
         const data = childSnapshot.val();
-        if (data && data.isOnline) {
+        const isRecentlyActive = data && data.lastActive && (Date.now() - data.lastActive < 60 * 60 * 1000);
+        if (data && data.isOnline && isRecentlyActive) {
           users.push({
             uid: childSnapshot.key!,
             ...data
@@ -112,7 +121,7 @@ export class DashboardComponent implements OnDestroy, OnInit {
 
     // Redirect guest to invite page if dashboard is disabled (except admin)
     const user = this.authService.currentUser();
-    const isAdmin = user?.email === 'janithgunawardana98@gmail.com';
+    const isAdmin = !!user && (user.role === 'admin' || (user.email && environment.adminEmails.includes(user.email)));
     if (!isAdmin) {
       this.photoService.dashboardEnabled$.subscribe(enabled => {
         if (!enabled) {

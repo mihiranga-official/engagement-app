@@ -15,5 +15,5 @@ export const environment = {
         cloudName: "dlcper4bl",
         uploadPreset: "engagement_gallery",
     },
-    adminEmails: ['admin@engagement.example.com', 'janithgunawardana98@gmail.com']
+    adminEmails: ['admin@engagement.example.com', 'janithgunawardana98@gmail.com', 'nayanamini2001@gmail.com']
 };

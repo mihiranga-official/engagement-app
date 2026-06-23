@@ -5,6 +5,7 @@ import { PhotoService, PhotoRecord } from '../../core/services/photo.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { ActivityService } from '../../core/services/activity.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-gallery',
@@ -29,7 +30,7 @@ export class GalleryComponent implements OnInit {
   ngOnInit() {
     // Redirect to home if gallery is disabled (except for admin)
     const user = this.authService.currentUser();
-    const isAdmin = user?.email === 'janithgunawardana98@gmail.com';
+    const isAdmin = !!user && (user.role === 'admin' || (user.email && environment.adminEmails.includes(user.email)));
     if (!isAdmin) {
       this.photoService.galleryEnabled$.subscribe(enabled => {
         if (!enabled) {

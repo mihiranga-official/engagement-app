@@ -1,35 +1,62 @@
-<nav style="background: linear-gradient(90deg, #2c4e35, #c5a02b); color: white; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-  <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; gap: 2rem; align-items: center;">
-    <div style="display: flex; gap: 1rem; align-items: center;">
-      <h1 style="margin: 0; font-size: 1.5rem; font-weight: bold; cursor: pointer;">
-        <a routerLink="/" style="color: white; text-decoration: none;">Janith & Shashika</a>
-      </h1>
-      <a *ngIf="showDashboardLink()" routerLink="/" routerLinkActive="active-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px;">Dashboard</a>
-      <a *ngIf="showGalleryLink()" routerLink="/gallery" routerLinkActive="active-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px;">Gallery</a>
-      <a *ngIf="showGuestWallLink()" routerLink="/guest-wall" routerLinkActive="active-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px;">Guest Wall</a>
-      <a *ngIf="authService.currentUser()?.email === 'janithgunawardana98@gmail.com'" routerLink="/admin" routerLinkActive="active-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px;">Admin</a>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="nav-brand">
+      <a routerLink="/" (click)="closeMobileMenu()">Janith & Shashika</a>
     </div>
-    <div style="display:flex; gap:1rem; align-items:center;">
-      <span *ngIf="authService.currentUser(); else loginLink" style="font-size:0.95rem; opacity:.9;">
-        Welcome, {{ authService.currentUser()?.name }}
+
+    <!-- Desktop Navigation Links -->
+    <div class="nav-links-desktop">
+      <a *ngIf="showDashboardLink()" routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">Dashboard</a>
+      <a *ngIf="showGalleryLink()" routerLink="/gallery" routerLinkActive="active-link">Gallery</a>
+      <a *ngIf="showGuestWallLink()" routerLink="/guest-wall" routerLinkActive="active-link">Guest Wall</a>
+      <a *ngIf="isAdmin()" routerLink="/admin" routerLinkActive="active-link">Admin</a>
+    </div>
+
+    <!-- Desktop User Actions -->
+    <div class="nav-actions-desktop">
+      <span *ngIf="authService.currentUser() as user" class="welcome-msg">
+        Welcome, {{ user.name }}
       </span>
-      <button *ngIf="authService.currentUser()" (click)="logout()" style="background: rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:white; padding:0.5rem 1rem; border-radius:999px; cursor:pointer;">Logout</button>
-      <ng-template #loginLink>
-        <a routerLink="/login" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; border:1px solid rgba(255,255,255,0.3);">Login</a>
-      </ng-template>
+      <button *ngIf="authService.currentUser()" (click)="logout(); closeMobileMenu()" class="logout-btn">Logout</button>
+      <a *ngIf="!authService.currentUser()" routerLink="/login" class="login-btn">Login</a>
+    </div>
+
+    <!-- Mobile Hamburger Menu Button -->
+    <button class="hamburger-btn" (click)="toggleMobileMenu()" aria-label="Toggle navigation menu">
+      <span class="hamburger-bar" [class.open]="mobileMenuOpen()"></span>
+      <span class="hamburger-bar" [class.open]="mobileMenuOpen()"></span>
+      <span class="hamburger-bar" [class.open]="mobileMenuOpen()"></span>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer / Dropdown Menu -->
+  <div class="mobile-menu" [class.open]="mobileMenuOpen()">
+    <div class="mobile-menu-links">
+      <a *ngIf="showDashboardLink()" routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">Dashboard</a>
+      <a *ngIf="showGalleryLink()" routerLink="/gallery" routerLinkActive="active-link" (click)="closeMobileMenu()">Gallery</a>
+      <a *ngIf="showGuestWallLink()" routerLink="/guest-wall" routerLinkActive="active-link" (click)="closeMobileMenu()">Guest Wall</a>
+      <a *ngIf="isAdmin()" routerLink="/admin" routerLinkActive="active-link" (click)="closeMobileMenu()">Admin</a>
+    </div>
+    <div class="mobile-menu-actions">
+      <span *ngIf="authService.currentUser() as user" class="mobile-welcome-msg">
+        Welcome, {{ user.name }}
+      </span>
+      <button *ngIf="authService.currentUser()" (click)="logout(); closeMobileMenu()" class="mobile-logout-btn">Logout</button>
+      <a *ngIf="!authService.currentUser()" routerLink="/login" (click)="closeMobileMenu()" class="mobile-login-btn">Login</a>
     </div>
   </div>
 </nav>
-<div id="app-content" style="min-height: calc(100vh - 70px); background: #faf7f2; padding: 1.5rem;">
+
+<div id="app-content">
   <router-outlet></router-outlet>
 </div>
 
 <!-- Inactivity Prompt Overlay -->
-<div *ngIf="showInactivityPrompt()" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);">
-  <div style="background: white; padding: 2.5rem; border-radius: 16px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-width: 400px;">
-    <h2 style="margin-top: 0; color: #1e293b; font-size: 1.5rem;">Are you there?</h2>
-    <p style="color: #64748b; margin-bottom: 2rem;">We noticed you've been inactive. For your security, you will be automatically logged out in a few seconds.</p>
-    <button type="button" (click)="imHere()" style="background: #3b82f6; color: white; border: none; padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: background 0.2s;">
+<div *ngIf="showInactivityPrompt()" class="inactivity-overlay">
+  <div class="inactivity-card">
+    <h2>Are you there?</h2>
+    <p>We noticed you've been inactive. For your security, you will be automatically logged out in a few seconds.</p>
+    <button type="button" (click)="imHere()" class="confirm-btn">
       Yes, I'm here!
     </button>
   </div>

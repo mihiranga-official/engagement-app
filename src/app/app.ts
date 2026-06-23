@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from './core/auth/auth.service';
 import { PhotoService } from './core/services/photo.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -17,12 +18,23 @@ export class App implements OnInit, OnDestroy {
   protected authService = inject(AuthService);
   private photoService = inject(PhotoService);
 
+  protected mobileMenuOpen = signal(false);
+
+  protected toggleMobileMenu() {
+    this.mobileMenuOpen.update(open => !open);
+  }
+
+  protected closeMobileMenu() {
+    this.mobileMenuOpen.set(false);
+  }
+
   protected galleryEnabled = toSignal(this.photoService.galleryEnabled$, { initialValue: true });
   protected dashboardEnabled = toSignal(this.photoService.dashboardEnabled$, { initialValue: true });
   protected guestWallEnabled = toSignal(this.photoService.guestWallEnabled$, { initialValue: true });
 
   protected isAdmin() {
-    return this.authService.currentUser()?.email === 'janithgunawardana98@gmail.com';
+    const user = this.authService.currentUser();
+    return !!user && (user.role === 'admin' || (user.email && environment.adminEmails.includes(user.email)));
   }
 
   protected showDashboardLink() {

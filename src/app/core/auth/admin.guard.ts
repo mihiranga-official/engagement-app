@@ -3,6 +3,7 @@ import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from './auth.service';
 import { firstValueFrom, filter, timeout } from 'rxjs';
 import { Auth, authState } from '@angular/fire/auth';
+import { environment } from '../../../environments/environment';
 
 export const AdminGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
@@ -28,7 +29,7 @@ export const AdminGuard: CanActivateFn = async (route, state) => {
 
   // Now check if user is admin
   const currentUser = authService.currentUser();
-  if (currentUser && currentUser.email === 'janithgunawardana98@gmail.com') {
+  if (currentUser && (currentUser.role === 'admin' || (currentUser.email && environment.adminEmails.includes(currentUser.email)))) {
     console.log('Admin access granted for:', currentUser.name);
     return true;
   } else {

@@ -6,6 +6,7 @@ import { GuestWallService, GuestWallMessage } from '../../core/services/guest-wa
 import { PhotoService } from '../../core/services/photo.service';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-guest-wall',
@@ -29,7 +30,7 @@ export class GuestWallComponent implements OnInit {
   ngOnInit() {
     // Redirect guest to home if guest wall is disabled (except admin)
     const user = this.currentUser();
-    const isAdmin = user?.email === 'janithgunawardana98@gmail.com';
+    const isAdmin = !!user && (user.role === 'admin' || (user.email && environment.adminEmails.includes(user.email)));
     if (!isAdmin) {
       this.photoService.guestWallEnabled$.subscribe(enabled => {
         if (!enabled) {
