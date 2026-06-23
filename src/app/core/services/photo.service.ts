@@ -199,9 +199,47 @@ export class PhotoService {
     return () => off(settingsRef, 'value', unsubscribe);
   });
 
+  // Real-time observable for global settings: dashboard visibility status
+  dashboardEnabled$: Observable<boolean> = new Observable(observer => {
+    const settingsRef = ref(this.database, 'settings/dashboardEnabled');
+    const unsubscribe = onValue(settingsRef, (snapshot) => {
+      const val = snapshot.val();
+      observer.next(val !== false);
+    }, (error) => {
+      console.error('Error loading dashboardEnabled setting:', error);
+      observer.next(true);
+    });
+    return () => off(settingsRef, 'value', unsubscribe);
+  });
+
+  // Real-time observable for global settings: guest wall visibility status
+  guestWallEnabled$: Observable<boolean> = new Observable(observer => {
+    const settingsRef = ref(this.database, 'settings/guestWallEnabled');
+    const unsubscribe = onValue(settingsRef, (snapshot) => {
+      const val = snapshot.val();
+      observer.next(val !== false);
+    }, (error) => {
+      console.error('Error loading guestWallEnabled setting:', error);
+      observer.next(true);
+    });
+    return () => off(settingsRef, 'value', unsubscribe);
+  });
+
   // Enable/disable curated guest gallery in settings node
   async setGalleryEnabled(enabled: boolean) {
     const settingsRef = ref(this.database, 'settings');
     await update(settingsRef, { galleryEnabled: enabled });
+  }
+
+  // Enable/disable dashboard page in settings node
+  async setDashboardEnabled(enabled: boolean) {
+    const settingsRef = ref(this.database, 'settings');
+    await update(settingsRef, { dashboardEnabled: enabled });
+  }
+
+  // Enable/disable guest wall in settings node
+  async setGuestWallEnabled(enabled: boolean) {
+    const settingsRef = ref(this.database, 'settings');
+    await update(settingsRef, { guestWallEnabled: enabled });
   }
 }

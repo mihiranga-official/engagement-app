@@ -7,29 +7,32 @@ import { Auth, authState } from '@angular/fire/auth';
 export const AdminGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const fireAuth = inject(Auth);
 
-  try {
-    // Wait for auth state to be established and user to be loaded
-    await firstValueFrom(
-      authState(fireAuth).pipe(
-        filter(user => user !== null),
-        timeout(5000)
-      )
-    );
+  // If user is still loading (undefined), wait for the AuthService signal to be set
+  if (authService.currentUser() === undefined) {
+    await new Promise<void>((resolve) => {
+      const timer = setInterval(() => {
+        if (authService.currentUser() !== undefined) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 30);
 
-    // Now check if user is admin
-    const currentUser = authService.currentUser();
-    if (currentUser && currentUser.email === 'janithgunawardana98@gmail.com') {
-      console.log('Admin access granted for:', currentUser.name);
-      return true;
-    } else {
-      console.warn('User is not admin:', currentUser);
-      router.navigate(['/login']);
-      return false;
-    }
-  } catch (error) {
-    console.error('Admin guard error:', error);
+      // Fallback timeout after 4 seconds
+      setTimeout(() => {
+        clearInterval(timer);
+        resolve();
+      }, 4000);
+    });
+  }
+
+  // Now check if user is admin
+  const currentUser = authService.currentUser();
+  if (currentUser && currentUser.email === 'janithgunawardana98@gmail.com') {
+    console.log('Admin access granted for:', currentUser.name);
+    return true;
+  } else {
+    console.warn('User is not admin:', currentUser);
     router.navigate(['/login']);
     return false;
   }

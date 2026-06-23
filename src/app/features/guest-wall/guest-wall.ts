@@ -1,8 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, AppUser } from '../../core/auth/auth.service';
 import { GuestWallService, GuestWallMessage } from '../../core/services/guest-wall.service';
+import { PhotoService } from '../../core/services/photo.service';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -12,15 +14,31 @@ import { Observable } from 'rxjs';
   styleUrls: ['./guest-wall.scss'],
   standalone: true,
 })
-export class GuestWallComponent {
+export class GuestWallComponent implements OnInit {
   private authService = inject(AuthService);
   private guestWallService = inject(GuestWallService);
+  private photoService = inject(PhotoService);
+  private router = inject(Router);
 
   protected currentUser = this.authService.currentUser;
   protected messages$: Observable<GuestWallMessage[]> = this.guestWallService.messages$;
 
   newMessage = '';
   isPosting = false;
+
+  ngOnInit() {
+    // Redirect guest to home if guest wall is disabled (except admin)
+    const user = this.currentUser();
+    const isAdmin = user?.email === 'janithgunawardana98@gmail.com';
+    if (!isAdmin) {
+      this.photoService.guestWallEnabled$.subscribe(enabled => {
+        if (!enabled) {
+          console.warn('Guest wall is disabled by admin');
+          this.router.navigate(['/']);
+        }
+      });
+    }
+  }
 
   async postMessage() {
     const user = this.currentUser();

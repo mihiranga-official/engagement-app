@@ -89,8 +89,38 @@ export class DashboardComponent implements OnDestroy, OnInit {
   private countdownSubscription = interval(1000).subscribe(() => this.updateCountdown());
   private firecrackerTimeout: any;
 
-  ngOnInit() {
+  async ngOnInit() {
     this.scheduleNextFirecracker();
+
+    // If user is still loading, wait for the AuthService signal to be set
+    if (this.authService.currentUser() === undefined) {
+      await new Promise<void>((resolve) => {
+        const timer = setInterval(() => {
+          if (this.authService.currentUser() !== undefined) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 30);
+
+        // Fallback after 3 seconds
+        setTimeout(() => {
+          clearInterval(timer);
+          resolve();
+        }, 3000);
+      });
+    }
+
+    // Redirect guest to invite page if dashboard is disabled (except admin)
+    const user = this.authService.currentUser();
+    const isAdmin = user?.email === 'janithgunawardana98@gmail.com';
+    if (!isAdmin) {
+      this.photoService.dashboardEnabled$.subscribe(enabled => {
+        if (!enabled) {
+          console.warn('Dashboard is disabled by admin');
+          this.router.navigate(['/invite']);
+        }
+      });
+    }
   }
 
   ngOnDestroy() {

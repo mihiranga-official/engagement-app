@@ -18,13 +18,23 @@ export class App implements OnInit, OnDestroy {
   private photoService = inject(PhotoService);
 
   protected galleryEnabled = toSignal(this.photoService.galleryEnabled$, { initialValue: true });
+  protected dashboardEnabled = toSignal(this.photoService.dashboardEnabled$, { initialValue: true });
+  protected guestWallEnabled = toSignal(this.photoService.guestWallEnabled$, { initialValue: true });
 
   protected isAdmin() {
     return this.authService.currentUser()?.email === 'janithgunawardana98@gmail.com';
   }
 
+  protected showDashboardLink() {
+    return this.isAdmin() || this.dashboardEnabled();
+  }
+
   protected showGalleryLink() {
-    return this.isAdmin() || this.galleryEnabled();
+    return !!this.authService.currentUser() && (this.isAdmin() || this.galleryEnabled());
+  }
+
+  protected showGuestWallLink() {
+    return !!this.authService.currentUser() && (this.isAdmin() || this.guestWallEnabled());
   }
 
   // Inactivity feature

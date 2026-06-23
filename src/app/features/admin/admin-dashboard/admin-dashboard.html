@@ -4,14 +4,42 @@
       <h1>⚙️ Admin Moderation Dashboard</h1>
       <p class="subtitle">Manage photos, messages, and analytics</p>
       
-      <!-- Gallery Toggle Control -->
-      <div class="gallery-toggle-control">
-        <span class="toggle-label">🖼️ Guest Curated Gallery:</span>
-        <button 
-          [class]="galleryEnabled() ? 'btn-toggle enabled' : 'btn-toggle disabled'" 
-          (click)="toggleGallery()">
-          {{ galleryEnabled() ? '🟢 Enabled (Visible to Guests)' : '🔴 Disabled (Hidden from Guests)' }}
-        </button>
+      <!-- Global Curated Guest Menus Status Settings -->
+      <div class="settings-panel-card">
+        <h3>🌐 Curated Guest Menus Status</h3>
+        <p class="description-text">Control which sections of the event application are visible and accessible to guests in real-time.</p>
+        
+        <div class="settings-toggles-grid">
+          <!-- Dashboard Toggle -->
+          <div class="setting-toggle-item">
+            <span class="setting-name">🏠 Dashboard Page</span>
+            <button 
+              [class]="dashboardEnabled() ? 'btn-toggle enabled' : 'btn-toggle disabled'" 
+              (click)="toggleDashboard()">
+              {{ dashboardEnabled() ? '🟢 Enabled' : '🔴 Disabled' }}
+            </button>
+          </div>
+
+          <!-- Gallery Toggle -->
+          <div class="setting-toggle-item">
+            <span class="setting-name">🖼️ Photo Gallery</span>
+            <button 
+              [class]="galleryEnabled() ? 'btn-toggle enabled' : 'btn-toggle disabled'" 
+              (click)="toggleGallery()">
+              {{ galleryEnabled() ? '🟢 Enabled' : '🔴 Disabled' }}
+            </button>
+          </div>
+
+          <!-- Guest Wall Toggle -->
+          <div class="setting-toggle-item">
+            <span class="setting-name">💬 Guest Wall Messages</span>
+            <button 
+              [class]="guestWallEnabled() ? 'btn-toggle enabled' : 'btn-toggle disabled'" 
+              (click)="toggleGuestWall()">
+              {{ guestWallEnabled() ? '🟢 Enabled' : '🔴 Disabled' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 

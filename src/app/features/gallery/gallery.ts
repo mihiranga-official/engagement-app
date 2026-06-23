@@ -27,16 +27,9 @@ export class GalleryComponent implements OnInit {
   protected uploading = signal(false);
 
   ngOnInit() {
-    // Ensure user is logged in
-    const user = this.authService.currentUser();
-    if (!user) {
-      console.warn('User not logged in for gallery');
-      this.router.navigate(['/login']);
-      return;
-    }
-
     // Redirect to home if gallery is disabled (except for admin)
-    const isAdmin = user.email === 'janithgunawardana98@gmail.com';
+    const user = this.authService.currentUser();
+    const isAdmin = user?.email === 'janithgunawardana98@gmail.com';
     if (!isAdmin) {
       this.photoService.galleryEnabled$.subscribe(enabled => {
         if (!enabled) {

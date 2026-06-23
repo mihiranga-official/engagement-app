@@ -23,12 +23,22 @@ export class AdminDashboardComponent implements OnDestroy {
   private activityService = inject(ActivityService);
 
   galleryEnabled = toSignal(this.photoService.galleryEnabled$, { initialValue: true });
+  dashboardEnabled = toSignal(this.photoService.dashboardEnabled$, { initialValue: true });
+  guestWallEnabled = toSignal(this.photoService.guestWallEnabled$, { initialValue: true });
   activeTab = signal<'photos' | 'messages' | 'analytics' | 'invites'>('photos');
   guestNameInput = signal('');
   generatedLink = signal('');
 
   async toggleGallery() {
     await this.photoService.setGalleryEnabled(!this.galleryEnabled());
+  }
+
+  async toggleDashboard() {
+    await this.photoService.setDashboardEnabled(!this.dashboardEnabled());
+  }
+
+  async toggleGuestWall() {
+    await this.photoService.setGuestWallEnabled(!this.guestWallEnabled());
   }
   pendingPhotos$: Observable<PhotoRecord[]> = this.photoService.pendingPhotos$;
   pendingMessages$: Observable<GuestWallMessage[]> = this.guestWallService.pendingMessages$;

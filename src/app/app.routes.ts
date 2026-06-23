@@ -1,13 +1,16 @@
 import { Routes } from '@angular/router';
 import { AdminGuard } from './core/auth/admin.guard';
+import { AuthGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
     { 
         path: '', 
+        pathMatch: 'full',
         loadComponent: () => import('./features/dashboard/dashboard').then(m => m.DashboardComponent) 
     },
     {
         path: 'gallery',
+        canActivate: [AuthGuard],
         loadComponent: () => import('./features/gallery/gallery').then(m => m.GalleryComponent)
     },
     {
@@ -17,6 +20,7 @@ export const routes: Routes = [
     },
     {
         path: 'guest-wall',
+        canActivate: [AuthGuard],
         loadComponent: () => import('./features/guest-wall/guest-wall').then(m => m.GuestWallComponent)
     },
     {
