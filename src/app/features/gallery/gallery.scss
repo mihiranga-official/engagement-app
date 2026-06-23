@@ -25,7 +25,7 @@
   justify-content: center;
   padding: 0.9rem 1.3rem;
   border-radius: 999px;
-  background: #8b5cf6;
+  background: #2c4e35;
   color: white;
   cursor: pointer;
   width: fit-content;
@@ -33,9 +33,9 @@
   transition: all 0.3s ease;
 
   &:hover {
-    background: #7c3aed;
+    background: #203a27;
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 10px 20px rgba(44, 78, 53, 0.3);
   }
 }
 
@@ -115,8 +115,8 @@
 
   &:hover {
     background: #e2e8f0;
-    border-color: #8b5cf6;
-    color: #8b5cf6;
+    border-color: #2c4e35;
+    color: #2c4e35;
   }
 
   &.liked {
@@ -152,16 +152,16 @@
 .ghost-link {
   display: inline-block;
   margin-top: 1rem;
-  color: #7c3aed;
+  color: #2c4e35;
   text-decoration: none;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
-  border: 1px solid #7c3aed;
+  border: 1px solid #2c4e35;
   border-radius: 8px;
   transition: all 0.3s ease;
 
   &:hover {
-    background: #7c3aed;
+    background: #2c4e35;
     color: white;
   }
 }

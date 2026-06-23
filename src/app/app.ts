@@ -71,4 +71,57 @@ export class App implements OnInit, OnDestroy {
       console.error('Logout failed:', error);
     }
   }
+
+  // Prevent right-click context menus globally
+  @HostListener('contextmenu', ['$event'])
+  onRightClick(event: MouseEvent) {
+    event.preventDefault();
+  }
+
+  // Prevent copying of elements/assets
+  @HostListener('window:copy', ['$event'])
+  onCopy(event: ClipboardEvent) {
+    event.preventDefault();
+  }
+
+  // Prevent critical keyboard shortcuts (Save, Print, DevTools, View Source)
+  @HostListener('window:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent) {
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const isCmdOrCtrl = isMac ? event.metaKey : event.ctrlKey;
+
+    // Prevent Ctrl+S / Cmd+S (Save Page)
+    if (isCmdOrCtrl && event.key === 's') {
+      event.preventDefault();
+    }
+
+    // Prevent Ctrl+P / Cmd+P (Print Page)
+    if (isCmdOrCtrl && event.key === 'p') {
+      event.preventDefault();
+    }
+
+    // Prevent Ctrl+U / Cmd+U (View Source)
+    if (isCmdOrCtrl && event.key === 'u') {
+      event.preventDefault();
+    }
+
+    // Prevent F12 and Ctrl+Shift+I/J/C (Developer Tools)
+    if (
+      event.key === 'F12' ||
+      (isCmdOrCtrl && event.shiftKey && 
+        (event.key === 'I' || event.key === 'J' || event.key === 'C' || 
+         event.key === 'i' || event.key === 'j' || event.key === 'c'))
+    ) {
+      event.preventDefault();
+    }
+  }
+
+  // Clear clipboard on PrintScreen key release and show notice
+  @HostListener('window:keyup', ['$event'])
+  onKeyUp(event: KeyboardEvent) {
+    if (event.key === 'PrintScreen' || event.key === 'PrtScn') {
+      navigator.clipboard.writeText('');
+      alert('Screenshots and saving images are restricted on this platform to protect shared memories.');
+    }
+  }
 }

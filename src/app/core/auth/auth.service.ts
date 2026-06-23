@@ -81,12 +81,16 @@ export class AuthService {
       })
     ).subscribe((appUser) => {
       if (appUser) {
-        const loginAt = localStorage.getItem('sessionStartStr');
+        let loginAt = localStorage.getItem('sessionStartStr');
         const now = Date.now();
         
-        if (!loginAt || (now - parseInt(loginAt, 10)) >= this.MAX_SESSION_MS) {
-          console.warn('Session expired or undefined, forcing logout');
-          // Important: clear the localStorage BEFORE logout to avoid loop
+        if (!loginAt) {
+          // If session timing is missing from localStorage but Firebase auth has a valid user (e.g., on page refresh),
+          // initialize it now rather than forcing a logout.
+          loginAt = now.toString();
+          localStorage.setItem('sessionStartStr', loginAt);
+        } else if ((now - parseInt(loginAt, 10)) >= this.MAX_SESSION_MS) {
+          console.warn('Session expired, forcing logout');
           localStorage.removeItem('sessionStartStr');
           this.logout();
           return;

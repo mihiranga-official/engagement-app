@@ -101,7 +101,7 @@ export class DashboardComponent implements OnDestroy, OnInit {
 
   private shootFirecracker() {
     // Subtle, small burst in the background
-    const colors = ['#8b5cf6', '#ec4899', '#fcd34d', '#ffffff', '#ffd700'];
+    const colors = ['#2c4e35', '#d4af37', '#c5a02b', '#ffffff', '#e8efe9'];
     
     // Shoot from a random X coordinate, mostly in the top half of the screen
     const x = Math.random() * 0.8 + 0.1; // 10% to 90% width
@@ -132,7 +132,7 @@ export class DashboardComponent implements OnDestroy, OnInit {
       
       const x = event.clientX / window.innerWidth;
       const y = event.clientY / window.innerHeight;
-      const colors = ['#8b5cf6', '#ec4899', '#fcd34d', '#ffffff', '#ffd700'];
+      const colors = ['#2c4e35', '#d4af37', '#c5a02b', '#ffffff', '#e8efe9'];
 
       confetti({
         particleCount: 8, // Very subtle for the mouse

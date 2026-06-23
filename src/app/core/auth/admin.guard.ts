@@ -20,7 +20,7 @@ export const AdminGuard: CanActivateFn = async (route, state) => {
 
     // Now check if user is admin
     const currentUser = authService.currentUser();
-    if (currentUser && currentUser.role === 'admin') {
+    if (currentUser && currentUser.email === 'janithgunawardana98@gmail.com') {
       console.log('Admin access granted for:', currentUser.name);
       return true;
     } else {

@@ -2,7 +2,7 @@
   display: grid;
   gap: 2rem;
   padding: 2rem;
-  background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
+  background: linear-gradient(135deg, #faf7f2 0%, #e8efe9 100%);
   min-height: 100vh;
 }
 
@@ -47,7 +47,7 @@
   padding: 1rem;
   background: #f8fafc;
   border-radius: 12px;
-  border-left: 4px solid #8b5cf6;
+  border-left: 4px solid #2c4e35;
 }
 
 .user-name {
@@ -72,8 +72,8 @@
 
   &:focus {
     outline: none;
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    border-color: #2c4e35;
+    box-shadow: 0 0 0 3px rgba(44, 78, 53, 0.1);
   }
 }
 
@@ -92,16 +92,16 @@
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 999px;
-  background: #8b5cf6;
+  background: #2c4e35;
   color: white;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 
   &:hover:not(:disabled) {
-    background: #7c3aed;
+    background: #203a27;
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 10px 20px rgba(44, 78, 53, 0.3);
   }
 
   &:disabled {
@@ -175,8 +175,8 @@
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 50px rgba(139, 92, 246, 0.15);
-    border-color: #8b5cf6;
+    box-shadow: 0 20px 50px rgba(44, 78, 53, 0.15);
+    border-color: #2c4e35;
   }
 }
 
@@ -199,7 +199,7 @@
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  background: linear-gradient(135deg, #2c4e35, #c5a02b);
   color: white;
   font-weight: 700;
   font-size: 1.1rem;

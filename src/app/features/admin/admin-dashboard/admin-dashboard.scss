@@ -2,7 +2,7 @@
   display: grid;
   gap: 2rem;
   padding: 2rem;
-  background: linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%);
+  background: linear-gradient(135deg, #e8efe9 0%, #faf7f2 100%);
   min-height: 100vh;
 }
 
@@ -43,14 +43,14 @@
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #8b5cf6;
-    color: #8b5cf6;
+    border-color: #2c4e35;
+    color: #2c4e35;
   }
 
   &.active {
-    background: #8b5cf6;
+    background: #2c4e35;
     color: white;
-    border-color: #8b5cf6;
+    border-color: #2c4e35;
   }
 
   .badge {
@@ -102,7 +102,7 @@
   .stat-value {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #8b5cf6;
+    color: #2c4e35;
     margin: 0;
   }
 }
@@ -336,7 +336,7 @@
   .stat-value {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #8b5cf6;
+    color: #2c4e35;
     margin: 0.5rem 0;
   }
 
@@ -435,14 +435,14 @@
 
   &:focus {
     outline: none;
-    border-color: #8b5cf6;
+    border-color: #2c4e35;
     background: white;
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+    box-shadow: 0 0 0 4px rgba(44, 78, 53, 0.1);
   }
 }
 
 .btn-primary {
-  background: #8b5cf6;
+  background: #2c4e35;
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 10px;
@@ -454,7 +454,7 @@
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: #7c3aed;
+    background: #203a27;
     transform: scale(1.02);
   }
 
@@ -517,11 +517,11 @@
 }
 
 .preview-link {
-  color: #8b5cf6;
+  color: #2c4e35;
   font-weight: 500;
   text-decoration: underline;
 
   &:hover {
-    color: #7c3aed;
+    color: #203a27;
   }
 }

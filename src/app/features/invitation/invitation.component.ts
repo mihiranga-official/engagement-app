@@ -25,8 +25,11 @@ import { map } from 'rxjs/operators';
             class="w-full h-full object-cover block"
           />
           
+          <!-- Transparent Protection Overlay (Blocks long-press menus and drag-and-drop on mobile/desktop) -->
+          <div class="absolute inset-0 z-20 pointer-events-auto bg-transparent"></div>
+          
           <!-- Dynamic Guest Name Overlay (Positioned exactly on the dotted line) -->
-          <div class="guest-name-overlay">
+          <div class="guest-name-overlay z-30">
             {{ guestName() }}
           </div>
         </div>
