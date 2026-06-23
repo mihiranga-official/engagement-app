@@ -5,7 +5,7 @@ import { AuthService, AppUser } from '../../core/auth/auth.service';
 import { Database, ref, onValue, off } from '@angular/fire/database';
 import { Observable, interval, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { PhotoRecord } from '../../core/services/photo.service';
+import { PhotoService, PhotoRecord } from '../../core/services/photo.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import confetti from 'canvas-confetti';
 
@@ -20,6 +20,17 @@ export class DashboardComponent implements OnDestroy, OnInit {
   protected authService = inject(AuthService);
   private router = inject(Router);
   private database = inject(Database);
+  private photoService = inject(PhotoService);
+
+  protected galleryEnabled = toSignal(this.photoService.galleryEnabled$, { initialValue: true });
+
+  protected isAdmin() {
+    return this.authService.currentUser()?.email === 'janithgunawardana98@gmail.com';
+  }
+
+  protected showGalleryButton() {
+    return this.isAdmin() || this.galleryEnabled();
+  }
   protected activeUsers$: Observable<AppUser[]> = new Observable(observer => {
     const usersRef = ref(this.database, 'users');
     

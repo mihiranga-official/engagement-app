@@ -17,7 +17,7 @@
       </div>
 
       <div class="hero-actions">
-        <a routerLink="/gallery" class="button button-secondary">View Gallery</a>
+        <a *ngIf="showGalleryButton()" routerLink="/gallery" class="button button-secondary">View Gallery</a>
         <a routerLink="/guest-wall" class="button button-primary">Guest Wall</a>
       </div>
     </div>

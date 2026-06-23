@@ -2,6 +2,8 @@ import { Component, inject, signal, OnInit, HostListener, OnDestroy } from '@ang
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './core/auth/auth.service';
+import { PhotoService } from './core/services/photo.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +15,17 @@ import { AuthService } from './core/auth/auth.service';
 export class App implements OnInit, OnDestroy {
   protected readonly title = signal('engagement-app');
   protected authService = inject(AuthService);
+  private photoService = inject(PhotoService);
+
+  protected galleryEnabled = toSignal(this.photoService.galleryEnabled$, { initialValue: true });
+
+  protected isAdmin() {
+    return this.authService.currentUser()?.email === 'janithgunawardana98@gmail.com';
+  }
+
+  protected showGalleryLink() {
+    return this.isAdmin() || this.galleryEnabled();
+  }
 
   // Inactivity feature
   showInactivityPrompt = signal(false);

@@ -184,4 +184,24 @@ export class PhotoService {
       return photo;
     });
   }
+
+  // Real-time observable for global settings: gallery visibility status
+  galleryEnabled$: Observable<boolean> = new Observable(observer => {
+    const settingsRef = ref(this.database, 'settings/galleryEnabled');
+    const unsubscribe = onValue(settingsRef, (snapshot) => {
+      const val = snapshot.val();
+      // Default to true if not explicitly set
+      observer.next(val !== false);
+    }, (error) => {
+      console.error('Error loading galleryEnabled setting:', error);
+      observer.next(true);
+    });
+    return () => off(settingsRef, 'value', unsubscribe);
+  });
+
+  // Enable/disable curated guest gallery in settings node
+  async setGalleryEnabled(enabled: boolean) {
+    const settingsRef = ref(this.database, 'settings');
+    await update(settingsRef, { galleryEnabled: enabled });
+  }
 }

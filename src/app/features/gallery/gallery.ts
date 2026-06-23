@@ -1,9 +1,10 @@
-import { Component, inject, signal, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, inject, signal, ViewChild, ElementRef, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { PhotoService, PhotoRecord } from '../../core/services/photo.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { ActivityService } from '../../core/services/activity.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-gallery',
@@ -19,7 +20,9 @@ export class GalleryComponent implements OnInit {
   protected authService = inject(AuthService);
   protected activityService = inject(ActivityService);
   protected router = inject(Router);
-  protected approvedPhotos$ = this.photoService.approvedPhotos$;
+  
+  protected approvedPhotos = toSignal(this.photoService.approvedPhotos$, { initialValue: [] });
+  protected selectedPhoto = signal<PhotoRecord | null>(null);
   protected uploadState = signal<string>('');
   protected uploading = signal(false);
 
@@ -29,6 +32,77 @@ export class GalleryComponent implements OnInit {
     if (!user) {
       console.warn('User not logged in for gallery');
       this.router.navigate(['/login']);
+      return;
+    }
+
+    // Redirect to home if gallery is disabled (except for admin)
+    const isAdmin = user.email === 'janithgunawardana98@gmail.com';
+    if (!isAdmin) {
+      this.photoService.galleryEnabled$.subscribe(enabled => {
+        if (!enabled) {
+          console.warn('Gallery is disabled by admin');
+          this.router.navigate(['/']);
+        }
+      });
+    }
+  }
+
+  protected openSlideshow(photo: PhotoRecord) {
+    this.selectedPhoto.set(photo);
+    // Track unique view per user session
+    this.trackView(photo);
+  }
+
+  protected closeSlideshow() {
+    this.selectedPhoto.set(null);
+  }
+
+  private getSelectedIndex(): number {
+    const photo = this.selectedPhoto();
+    if (!photo) return -1;
+    return this.approvedPhotos().findIndex(p => p.id === photo.id);
+  }
+
+  protected showPrev(event: Event) {
+    event.stopPropagation();
+    const photos = this.approvedPhotos();
+    if (photos.length === 0) return;
+    const index = this.getSelectedIndex();
+    if (index > 0) {
+      this.selectedPhoto.set(photos[index - 1]);
+      this.trackView(photos[index - 1]);
+    } else {
+      // Loop to end
+      this.selectedPhoto.set(photos[photos.length - 1]);
+      this.trackView(photos[photos.length - 1]);
+    }
+  }
+
+  protected showNext(event: Event) {
+    event.stopPropagation();
+    const photos = this.approvedPhotos();
+    if (photos.length === 0) return;
+    const index = this.getSelectedIndex();
+    if (index >= 0 && index < photos.length - 1) {
+      this.selectedPhoto.set(photos[index + 1]);
+      this.trackView(photos[index + 1]);
+    } else {
+      // Loop to beginning
+      this.selectedPhoto.set(photos[0]);
+      this.trackView(photos[0]);
+    }
+  }
+
+  // Handle arrow keys and escape key for slideshow
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (!this.selectedPhoto()) return;
+    if (event.key === 'ArrowLeft') {
+      this.showPrev(event);
+    } else if (event.key === 'ArrowRight') {
+      this.showNext(event);
+    } else if (event.key === 'Escape') {
+      this.closeSlideshow();
     }
   }
 

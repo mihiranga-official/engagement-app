@@ -1,4 +1,5 @@
 import { Component, inject, OnDestroy, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, AppUser } from '../../../core/auth/auth.service';
@@ -21,9 +22,14 @@ export class AdminDashboardComponent implements OnDestroy {
   private guestWallService = inject(GuestWallService);
   private activityService = inject(ActivityService);
 
+  galleryEnabled = toSignal(this.photoService.galleryEnabled$, { initialValue: true });
   activeTab = signal<'photos' | 'messages' | 'analytics' | 'invites'>('photos');
   guestNameInput = signal('');
   generatedLink = signal('');
+
+  async toggleGallery() {
+    await this.photoService.setGalleryEnabled(!this.galleryEnabled());
+  }
   pendingPhotos$: Observable<PhotoRecord[]> = this.photoService.pendingPhotos$;
   pendingMessages$: Observable<GuestWallMessage[]> = this.guestWallService.pendingMessages$;
   approvedPhotos$: Observable<PhotoRecord[]> = this.photoService.approvedPhotos$;

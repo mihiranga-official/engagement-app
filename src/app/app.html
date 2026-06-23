@@ -3,7 +3,7 @@
     <div style="display: flex; gap: 1rem; align-items: center;">
       <h1 style="margin: 0; font-size: 1.5rem;">Janith & Shashika </h1>
       <a routerLink="/" routerLinkActive="active-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px;">Dashboard</a>
-      <a routerLink="/gallery" routerLinkActive="active-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px;">Gallery</a>
+      <a *ngIf="showGalleryLink()" routerLink="/gallery" routerLinkActive="active-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px;">Gallery</a>
       <a routerLink="/guest-wall" routerLinkActive="active-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px;">Guest Wall</a>
       <a *ngIf="authService.currentUser()?.email === 'janithgunawardana98@gmail.com'" routerLink="/admin" routerLinkActive="active-link" style="color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px;">Admin</a>
     </div>

@@ -12,11 +12,11 @@
     </div>
   </div>
 
-  <div class="gallery-grid" *ngIf="approvedPhotos$ | async as photos">
-    <div class="photos-container" *ngIf="photos.length; else emptyState">
-      <div class="photo-card" *ngFor="let photo of photos">
-        <div style="position: relative; overflow: hidden; aspect-ratio: 4/3;">
-          <img [src]="photo.url" alt="Approved photo" (load)="trackView(photo)" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+  <div class="gallery-grid">
+    <div class="photos-container" *ngIf="approvedPhotos().length; else emptyState">
+      <div class="photo-card" *ngFor="let photo of approvedPhotos()">
+        <div style="position: relative; overflow: hidden; aspect-ratio: 4/3; cursor: pointer;" (click)="openSlideshow(photo)">
+          <img [src]="photo.url" alt="Approved photo" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
           <div style="position: absolute; inset: 0; z-index: 20; background: transparent;"></div>
         </div>
         <div class="photo-info">
@@ -25,7 +25,6 @@
             <span>{{ photo.viewsCount }} views · {{ photo.likesCount }} likes</span>
           </div>
           <div class="photo-actions">
-            <!-- View button removed, likes remain -->
             <button type="button" [class.liked]="hasLiked(photo)" (click)="likePhoto(photo)">
               {{ hasLiked(photo) ? '❤️ Liked' : '🤍 Like' }}
             </button>
@@ -33,6 +32,27 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- SLIDESHOW / LIGHTBOX MODAL OVERLAY -->
+  <div class="slideshow-overlay" *ngIf="selectedPhoto()" (click)="closeSlideshow()">
+    <button class="close-btn" (click)="closeSlideshow()">&times;</button>
+    
+    <button class="nav-btn prev-btn" (click)="showPrev($event)">&#10094;</button>
+    
+    <div class="slideshow-content" (click)="$event.stopPropagation()">
+      <div class="slideshow-image-wrapper">
+        <img [src]="selectedPhoto()?.url" alt="Slideshow Image" class="slideshow-img" />
+        <div style="position: absolute; inset: 0; z-index: 20; background: transparent;"></div>
+      </div>
+      
+      <div class="slideshow-meta">
+        <span class="uploaded-by">📸 Shared by {{ selectedPhoto()?.uploadedBy }}</span>
+        <span class="photo-stats">👁 {{ selectedPhoto()?.viewsCount }} views · ❤️ {{ selectedPhoto()?.likesCount }} likes</span>
+      </div>
+    </div>
+    
+    <button class="nav-btn next-btn" (click)="showNext($event)">&#10095;</button>
   </div>
 
   <ng-template #emptyState>

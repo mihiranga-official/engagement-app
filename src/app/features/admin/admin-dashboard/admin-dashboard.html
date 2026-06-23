@@ -3,6 +3,16 @@
     <div class="header-content">
       <h1>⚙️ Admin Moderation Dashboard</h1>
       <p class="subtitle">Manage photos, messages, and analytics</p>
+      
+      <!-- Gallery Toggle Control -->
+      <div class="gallery-toggle-control">
+        <span class="toggle-label">🖼️ Guest Curated Gallery:</span>
+        <button 
+          [class]="galleryEnabled() ? 'btn-toggle enabled' : 'btn-toggle disabled'" 
+          (click)="toggleGallery()">
+          {{ galleryEnabled() ? '🟢 Enabled (Visible to Guests)' : '🔴 Disabled (Hidden from Guests)' }}
+        </button>
+      </div>
     </div>
 
     <nav class="admin-tabs">
