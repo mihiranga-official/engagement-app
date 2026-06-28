@@ -1,13 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-invitation',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="min-h-screen bg-[#e8efe9] flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
       <!-- Decorative Greenery Background Blurs -->
@@ -66,6 +66,14 @@ import { map } from 'rxjs/operators';
             📞 RSVP: Call Janith
           </a>
         </div>
+        
+        <!-- Back to Generate Page Button -->
+        <a 
+          routerLink="/admin" 
+          class="w-full bg-[#f3f4f6] hover:bg-[#e5e7eb] text-[#374151] font-medium py-3.5 px-6 rounded-2xl transition duration-300 ease-out shadow-sm flex items-center justify-center gap-2 text-center mt-1 border border-gray-200"
+        >
+          ⬅️ Back to Generate Page
+        </a>
       </div>
     </div>
   `,
