@@ -20,7 +20,7 @@ import { map } from 'rxjs/operators';
         <!-- Invitation Card Image Container -->
         <div class="relative w-full aspect-[3/4.2] rounded-2xl overflow-hidden shadow-inner invite-card-container">
           <img 
-            src="/Janith & shashika.jpg.jpeg" 
+            src="/invitation-02.jpg.jpeg" 
             alt="Engagement Invitation of Sashika and Janith" 
             class="w-full h-full object-cover block"
           />
@@ -70,7 +70,7 @@ import { map } from 'rxjs/operators';
     </div>
   `,
   styles: [`
-    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap');
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(30px); }
@@ -97,10 +97,11 @@ import { map } from 'rxjs/operators';
     transform: translate(-50%, -50%);
     width: 76%;
     text-align: center;
-    font-family: "Dancing Script", cursive;
+    font-family: "Cormorant Garamond", serif;
     font-size: 5cqw;
     color: #0f3ba2;
     font-weight: 500;
+    font-style: italic;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -129,7 +130,7 @@ export class InvitationComponent {
 
     try {
       const guestName = this.guestName();
-      const imgUrl = '/Janith & shashika.jpg.jpeg';
+      const imgUrl = '/invitation-02.jpg.jpeg';
 
       // Load image programmatically
       const img = new Image();
