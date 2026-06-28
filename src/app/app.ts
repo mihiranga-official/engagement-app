@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, HostListener, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit, HostListener, OnDestroy, NgZone } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './core/auth/auth.service';
@@ -17,6 +17,7 @@ export class App implements OnInit, OnDestroy {
   protected readonly title = signal('engagement-app');
   protected authService = inject(AuthService);
   private photoService = inject(PhotoService);
+  private ngZone = inject(NgZone);
 
   protected mobileMenuOpen = signal(false);
 
@@ -53,9 +54,10 @@ export class App implements OnInit, OnDestroy {
   showInactivityPrompt = signal(false);
   private inactivityTimeout: any;
   private refreshTimeout: any;
+  private lastActivityTime = 0; // throttle flag to avoid hammering resetTimer
   
   // Set the limit to 15 minutes
-  private INACTIVITY_LIMIT_MS = 15 * 60 * 1000; 
+  private INACTIVITY_LIMIT_MS = 15 * 60 * 1000;
 
   async ngOnInit() {
     this.resetTimer();
@@ -72,6 +74,10 @@ export class App implements OnInit, OnDestroy {
   @HostListener('window:click')
   @HostListener('window:scroll')
   onUserActivity() {
+    // Throttle to once every 2 seconds to avoid flooding Zone.js with clearTimeout/setTimeout
+    const now = Date.now();
+    if (now - this.lastActivityTime < 2000) return;
+    this.lastActivityTime = now;
     // Only reset if the prompt isn't already showing
     if (!this.showInactivityPrompt()) {
       this.resetTimer();
@@ -79,19 +85,25 @@ export class App implements OnInit, OnDestroy {
   }
 
   resetTimer() {
-    clearTimeout(this.inactivityTimeout);
-    clearTimeout(this.refreshTimeout);
-    
-    // Start the inactivity countdown
-    this.inactivityTimeout = setTimeout(() => {
-      this.showInactivityPrompt.set(true);
-      
-      // If they don't respond within 30 seconds of the prompt popping up, log them out
-      this.refreshTimeout = setTimeout(() => {
-        this.logout();
-      }, 30000); 
+    // Run timers OUTSIDE Angular zone so clearTimeout/setTimeout don't interfere with
+    // Zone.js macrotask tracking and freeze change detection (e.g., countdown seconds)
+    this.ngZone.runOutsideAngular(() => {
+      clearTimeout(this.inactivityTimeout);
+      clearTimeout(this.refreshTimeout);
 
-    }, this.INACTIVITY_LIMIT_MS);
+      this.inactivityTimeout = setTimeout(() => {
+        // Re-enter Angular zone to update signals
+        this.ngZone.run(() => {
+          this.showInactivityPrompt.set(true);
+        });
+
+        this.refreshTimeout = setTimeout(() => {
+          this.ngZone.run(() => {
+            this.logout();
+          });
+        }, 30000);
+      }, this.INACTIVITY_LIMIT_MS);
+    });
   }
 
   imHere() {

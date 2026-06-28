@@ -1,45 +1,94 @@
 <section class="dashboard-hero">
   <div class="hero-card">
     <div class="hero-copy">
-      <p class="eyebrow">Engagement Celebration</p>
-      <h1>July 30 · Janith & Shashika</h1>
-      <!-- <p class="intro">Private guest experience with photo uploads, real-time guest wall, and admin moderation.</p> -->
+      <p class="eyebrow-accent">Engagement Celebration</p>
+      <h1 class="couple-names">Janith <span class="ampersand">&</span> Shashika</h1>
+      <p class="celebration-date">July 30, 2026</p>
 
-      <div class="hero-meta">
-        <div>
-          <span>Countdown</span>
-          <strong>{{ countdown() }}</strong>
+      <!-- Premium Segmented Countdown -->
+      <div class="countdown-container" *ngIf="!cdLive(); else liveTemplate">
+        <div class="countdown-unit">
+          <span class="number">{{ cdDays() }}</span>
+          <span class="label">Days</span>
         </div>
-        <div>
-          <span>Guests online</span>
-          <strong>{{ activeUserCount$ | async }}</strong>
+        <div class="countdown-divider">:</div>
+        <div class="countdown-unit">
+          <span class="number">{{ cdHours() }}</span>
+          <span class="label">Hours</span>
+        </div>
+        <div class="countdown-divider">:</div>
+        <div class="countdown-unit">
+          <span class="number">{{ cdMinutes() }}</span>
+          <span class="label">Minis</span>
+        </div>
+        <div class="countdown-divider">:</div>
+        <div class="countdown-unit">
+          <span class="number">{{ cdSeconds() }}</span>
+          <span class="label">Second</span>
         </div>
       </div>
+      <ng-template #liveTemplate>
+        <div class="live-badge">🎉 The Celebration is Live!</div>
+      </ng-template>
 
-      <div class="hero-actions">
-        <a *ngIf="showGalleryButton()" routerLink="/gallery" class="button button-secondary">View Gallery</a>
-        <a routerLink="/guest-wall" class="button button-primary">Guest Wall</a>
+      <!-- Live Guests Online Indicator -->
+      <div class="online-indicator-badge">
+        <span class="pulse-dot"></span>
+        <span class="badge-text">{{ activeUserCount$ | async }} guests celebrating online</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="celebration-actions">
+        <a *ngIf="showGalleryButton()" routerLink="/gallery" class="action-btn btn-secondary">View Gallery</a>
+        <a routerLink="/guest-wall" class="action-btn btn-primary">Guest Wall</a>
       </div>
     </div>
 
-    <div class="hero-details">
-      <div class="detail-card">
-        <h2>Venue</h2>
-        <p>Arangala Forest Lodge</p>
+    <!-- Event Details Grid -->
+    <div class="event-details-grid">
+      <div class="event-detail-item" (click)="scrollToLocation()" style="cursor: pointer;">
+        <div class="detail-icon">📍</div>
+        <div class="detail-info">
+          <span class="detail-label">VENUE</span>
+          <span class="detail-val">Arangala Forest Lodge</span>
+        </div>
       </div>
-      <div class="detail-card">
-        <h2>Event Time</h2>
-        <p>2026 July 30 · 10:00 AM</p>
+      <div class="event-detail-item">
+        <div class="detail-icon">📅</div>
+        <div class="detail-info">
+          <span class="detail-label">EVENT TIME</span>
+          <span class="detail-val">July 30 · 09:30 AM</span>
+        </div>
       </div>
-      <div class="detail-card">
-        <h2>Current mood</h2>
-        <p>Gold, white, blush, and celebration.</p>
+      <div class="event-detail-item">
+        <div class="detail-icon">✨</div>
+        <div class="detail-info">
+          <span class="detail-label">THEME MOOD</span>
+          <span class="detail-val">Gold, White, Blush & Celebration</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location Scroll Guide -->
+    <div class="location-scroll-indicator" (click)="scrollToLocation()" style="cursor: pointer; margin-top: 1.5rem; margin-bottom: 0;">
+      <span class="indicator-text">Venue & Location Below</span>
+      <div class="indicator-arrows">
+        <svg class="chevron" viewBox="0 0 24 24" width="24" height="24">
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+        </svg>
+        <svg class="chevron" viewBox="0 0 24 24" width="24" height="24">
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/>
+        </svg>
       </div>
     </div>
   </div>
 
-  <div class="hero-image-card">
-    <img src="/Janith & shashikala-02-02.jpg.jpeg" alt="Happy Couple" />
+  <div class="hero-image-card" (click)="openInvitationModal()" style="cursor: pointer;">
+    <img src="/wedding invitation-01.jpg.jpeg" alt="Wedding Invitation" />
+    <div class="preview-overlay">
+      <span class="zoom-icon">🔍</span>
+      <span>Click to Zoom</span>
+    </div>
   </div>
 </section>
 
@@ -83,3 +132,14 @@
     <!-- <p class="empty-state">No featured photos are approved yet. Check back soon.</p> -->
   </ng-template>
 </section>
+
+<!-- Lightbox Modal -->
+<div class="invitation-modal" *ngIf="isInvitationModalOpen()" (click)="closeInvitationModal()">
+  <button class="modal-close-btn" (click)="closeInvitationModal()">&times;</button>
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-img-container">
+      <img src="/wedding invitation-01.jpg.jpeg" alt="Wedding Invitation Full Screen" class="modal-img" />
+      <div class="modal-protection-overlay"></div>
+    </div>
+  </div>
+</div>

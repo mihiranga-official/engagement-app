@@ -1,13 +1,13 @@
-import { Component, inject, OnDestroy, OnInit, signal, computed, HostListener } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, AfterViewInit, signal, computed, HostListener, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService, AppUser } from '../../core/auth/auth.service';
 import { Database, ref, onValue, off } from '@angular/fire/database';
-import { Observable, interval, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { PhotoService, PhotoRecord } from '../../core/services/photo.service';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import confetti from 'canvas-confetti';
 import { environment } from '../../../environments/environment';
 
@@ -18,11 +18,13 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./dashboard.scss'],
   standalone: true,
 })
-export class DashboardComponent implements OnDestroy, OnInit {
+export class DashboardComponent implements OnDestroy, OnInit, AfterViewInit {
   protected authService = inject(AuthService);
   private router = inject(Router);
   private database = inject(Database);
   private photoService = inject(PhotoService);
+  private ngZone = inject(NgZone);
+  private cdr = inject(ChangeDetectorRef);
   private sanitizer = inject(DomSanitizer);
 
   protected readonly mapUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
@@ -94,49 +96,71 @@ export class DashboardComponent implements OnDestroy, OnInit {
     this.featuredPhotos().filter(photo => photo.status === 'approved')
   );
 
-  protected countdown = signal('00d 00h 00m 00s');
-  private countdownSubscription = interval(1000).subscribe(() => this.updateCountdown());
+  // Countdown signals for modern, reactive, and robust UI updates
+  protected cdDays = signal('00');
+  protected cdHours = signal('00');
+  protected cdMinutes = signal('00');
+  protected cdSeconds = signal('00');
+  protected cdLive = signal(false);
+  private countdownInterval: any;
+  private authSubscription?: Subscription;
   private firecrackerTimeout: any;
 
-  async ngOnInit() {
-    this.scheduleNextFirecracker();
+  protected isInvitationModalOpen = signal(false);
 
-    // If user is still loading, wait for the AuthService signal to be set
-    if (this.authService.currentUser() === undefined) {
-      await new Promise<void>((resolve) => {
-        const timer = setInterval(() => {
-          if (this.authService.currentUser() !== undefined) {
-            clearInterval(timer);
-            resolve();
-          }
-        }, 30);
+  protected openInvitationModal() {
+    this.isInvitationModalOpen.set(true);
+  }
 
-        // Fallback after 3 seconds
-        setTimeout(() => {
-          clearInterval(timer);
-          resolve();
-        }, 3000);
-      });
-    }
+  protected closeInvitationModal() {
+    this.isInvitationModalOpen.set(false);
+  }
 
-    // Redirect guest to invite page if dashboard is disabled (except admin)
-    const user = this.authService.currentUser();
-    const isAdmin = !!user && (user.role === 'admin' || (user.email && environment.adminEmails.includes(user.email)));
-    if (!isAdmin) {
-      this.photoService.dashboardEnabled$.subscribe(enabled => {
-        if (!enabled) {
-          console.warn('Dashboard is disabled by admin');
-          this.router.navigate(['/invite']);
-        }
-      });
+  protected scrollToLocation() {
+    const mapElement = document.querySelector('.map-section');
+    if (mapElement) {
+      mapElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
   }
 
+  ngOnInit() {
+    this.updateCountdown(); // Run immediately on load
+    this.countdownInterval = setInterval(() => {
+      this.updateCountdown();
+    }, 1000);
+
+    // Run firecrackers OUTSIDE zone — confetti uses requestAnimationFrame which Zone.js patches
+    this.ngZone.runOutsideAngular(() => {
+      this.scheduleNextFirecracker();
+    });
+
+
+
+    // Reactively watch for auth user changes to handle redirect without async/await
+    this.authSubscription = toObservable(this.authService.currentUser).subscribe((user) => {
+      if (user === undefined) return; // Wait until auth state is loaded
+
+      const isAdmin = !!user && (user.role === 'admin' || (user.email && environment.adminEmails.includes(user.email)));
+      if (!isAdmin) {
+        this.photoService.dashboardEnabled$.subscribe(enabled => {
+          if (!enabled) {
+            console.warn('Dashboard is disabled by admin');
+            this.router.navigate(['/invite']);
+          }
+        });
+      }
+    });
+  }
+
   ngOnDestroy() {
-    this.countdownSubscription.unsubscribe();
+    this.countdownInterval && clearInterval(this.countdownInterval);
+    this.authSubscription?.unsubscribe();
     if (this.firecrackerTimeout) {
       clearTimeout(this.firecrackerTimeout);
     }
+
   }
 
   private scheduleNextFirecracker() {
@@ -170,46 +194,45 @@ export class DashboardComponent implements OnDestroy, OnInit {
     });
   }
 
-  // Mouse trail effect variables
+  // Mouse trail effect — runs OUTSIDE zone so mousemove doesn't trigger Angular change detection on every pixel
   private lastMouseConfettiTime = 0;
 
-  @HostListener('mousemove', ['$event'])
-  onMouseMove(event: MouseEvent) {
-    const now = Date.now();
-    // Throttle to one burst every 150ms so we don't crash the browser!
-    if (now - this.lastMouseConfettiTime > 150) {
-      this.lastMouseConfettiTime = now;
-      
-      const x = event.clientX / window.innerWidth;
-      const y = event.clientY / window.innerHeight;
-      const colors = ['#2c4e35', '#d4af37', '#c5a02b', '#ffffff', '#e8efe9'];
-
-      confetti({
-        particleCount: 8, // Very subtle for the mouse
-        startVelocity: 10,
-        spread: 360,
-        ticks: 40,
-        gravity: 0.5,
-        scalar: 0.5, // make them look like tiny sparks
-        colors: colors,
-        origin: { x, y },
-        zIndex: 0
+  ngAfterViewInit() {
+    this.ngZone.runOutsideAngular(() => {
+      document.addEventListener('mousemove', (event: MouseEvent) => {
+        const now = Date.now();
+        if (now - this.lastMouseConfettiTime > 150) {
+          this.lastMouseConfettiTime = now;
+          const x = event.clientX / window.innerWidth;
+          const y = event.clientY / window.innerHeight;
+          const colors = ['#2c4e35', '#d4af37', '#c5a02b', '#ffffff', '#e8efe9'];
+          confetti({
+            particleCount: 8,
+            startVelocity: 10,
+            spread: 360,
+            ticks: 40,
+            gravity: 0.5,
+            scalar: 0.5,
+            colors: colors,
+            origin: { x, y },
+            zIndex: 0
+          });
+        }
       });
-    }
+    });
   }
 
   private updateCountdown() {
-    const eventDate = new Date('2026-07-30T18:00:00');
+    const eventDate = new Date(2026, 6, 30, 18, 0, 0); // July 30, 2026
     const diff = eventDate.getTime() - Date.now();
     if (diff <= 0) {
-      this.countdown.set('Event is live!');
+      this.cdLive.set(true);
       return;
     }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    this.countdown.set(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+    this.cdLive.set(false);
+    this.cdDays.set(String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0'));
+    this.cdHours.set(String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0'));
+    this.cdMinutes.set(String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0'));
+    this.cdSeconds.set(String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0'));
   }
 }
