@@ -5,7 +5,7 @@ import { RouterLink, Router } from '@angular/router';
 import { AuthService, AppUser } from '../../core/auth/auth.service';
 import { Database, ref, onValue, off } from '@angular/fire/database';
 import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { PhotoService, PhotoRecord } from '../../core/services/photo.service';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import confetti from 'canvas-confetti';
@@ -41,55 +41,65 @@ export class DashboardComponent implements OnDestroy, OnInit, AfterViewInit {
   protected showGalleryButton() {
     return this.isAdmin() || this.galleryEnabled();
   }
-  protected activeUsers$: Observable<AppUser[]> = new Observable(observer => {
-    const usersRef = ref(this.database, 'users');
-    
-    const unsubscribe = onValue(usersRef, (snapshot) => {
-      const users: AppUser[] = [];
-      snapshot.forEach((childSnapshot) => {
-        const data = childSnapshot.val();
-        const isRecentlyActive = data && data.lastActive && (Date.now() - data.lastActive < 60 * 60 * 1000);
-        if (data && data.isOnline && isRecentlyActive) {
-          users.push({
-            uid: childSnapshot.key!,
-            ...data
+  protected activeUsers$: Observable<AppUser[]> = toObservable(this.authService.currentUser).pipe(
+    switchMap(user => {
+      if (!user) return new Observable<AppUser[]>(observer => { observer.next([]); observer.complete(); });
+      return new Observable<AppUser[]>(observer => {
+        const usersRef = ref(this.database, 'users');
+        
+        const unsubscribe = onValue(usersRef, (snapshot) => {
+          const users: AppUser[] = [];
+          snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            const isRecentlyActive = data && data.lastActive && (Date.now() - data.lastActive < 60 * 60 * 1000);
+            if (data && data.isOnline && isRecentlyActive) {
+              users.push({
+                uid: childSnapshot.key!,
+                ...data
+              });
+            }
           });
-        }
-      });
-      observer.next(users);
-    }, (error) => {
-      console.error('Error loading active users:', error);
-      observer.error(error);
-    });
+          observer.next(users);
+        }, (error) => {
+          console.error('Error loading active users:', error);
+          observer.error(error);
+        });
 
-    return () => off(usersRef, 'value', unsubscribe);
-  });
+        return () => off(usersRef, 'value', unsubscribe);
+      });
+    })
+  );
   protected activeUserCount$ = this.activeUsers$.pipe(map(users => users.length));
   
-  private featuredPhotos$ = new Observable<PhotoRecord[]>(observer => {
-    const photosRef = ref(this.database, 'photos');
-    
-    const unsubscribe = onValue(photosRef, (snapshot) => {
-      const photos: PhotoRecord[] = [];
-      snapshot.forEach((childSnapshot) => {
-        const data = childSnapshot.val();
-        if (data && data.pinned) {
-          photos.push({
-            id: childSnapshot.key!,
-            ...data
+  private featuredPhotos$ = toObservable(this.authService.currentUser).pipe(
+    switchMap(user => {
+      if (!user) return new Observable<PhotoRecord[]>(observer => { observer.next([]); observer.complete(); });
+      return new Observable<PhotoRecord[]>(observer => {
+        const photosRef = ref(this.database, 'photos');
+        
+        const unsubscribe = onValue(photosRef, (snapshot) => {
+          const photos: PhotoRecord[] = [];
+          snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            if (data && data.pinned) {
+              photos.push({
+                id: childSnapshot.key!,
+                ...data
+              });
+            }
           });
-        }
-      });
-      // Sort by createdAt descending and limit to 10
-      photos.sort((a, b) => b.createdAt - a.createdAt);
-      observer.next(photos.slice(0, 10));
-    }, (error) => {
-      console.error('Error loading featured photos:', error);
-      observer.error(error);
-    });
+          // Sort by createdAt descending and limit to 10
+          photos.sort((a, b) => b.createdAt - a.createdAt);
+          observer.next(photos.slice(0, 10));
+        }, (error) => {
+          console.error('Error loading featured photos:', error);
+          observer.error(error);
+        });
 
-    return () => off(photosRef, 'value', unsubscribe);
-  });
+        return () => off(photosRef, 'value', unsubscribe);
+      });
+    })
+  );
   
   protected featuredPhotos = toSignal(this.featuredPhotos$, { initialValue: [] });
   protected approvedFeaturedPhotos = computed(() => 

@@ -264,29 +264,42 @@ router-outlet {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1.25rem;
+  gap: 0.5rem;
   background: rgba(44, 78, 53, 0.03); // Very soft green tint
   border: 1px solid rgba(44, 78, 53, 0.08);
-  padding: 1.25rem 2rem;
+  padding: 1rem 0.5rem;
   border-radius: 20px;
   margin: 0.5rem auto 1.5rem;
   max-width: 480px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01);
+
+  @media (min-width: 480px) {
+    gap: 1.25rem;
+    padding: 1.25rem 2rem;
+  }
 }
 
 .countdown-unit {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 55px;
+  min-width: 45px;
+  
+  @media (min-width: 480px) {
+    min-width: 55px;
+  }
   
   .number {
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     font-weight: 600;
     color: #2c4e35; // Theme green
     line-height: 1.1;
     letter-spacing: -0.02em;
+
+    @media (min-width: 480px) {
+      font-size: 1.8rem;
+    }
   }
   
   .label {
@@ -301,10 +314,14 @@ router-outlet {
 }
 
 .countdown-divider {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 300;
   color: rgba(44, 78, 53, 0.25);
   margin-top: -0.85rem;
+
+  @media (min-width: 480px) {
+    font-size: 1.5rem;
+  }
 }
 
 .live-badge {
@@ -370,7 +387,12 @@ router-outlet {
   gap: 1rem;
   justify-content: center;
   margin-top: 0.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  
+  @media (min-width: 480px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }
 
 .action-btn {
@@ -388,7 +410,12 @@ router-outlet {
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   min-width: 170px;
+  width: 100%;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  
+  @media (min-width: 480px) {
+    width: auto;
+  }
   
   &.btn-primary {
     background: linear-gradient(135deg, #2c4e35 0%, #1e3624 100%);
@@ -418,7 +445,7 @@ router-outlet {
 
 .event-details-grid {
   display: grid;
-  gap: 1.25rem;
+  gap: 1rem;
   grid-template-columns: 1fr;
   margin-top: 1.5rem;
   padding-top: 1.5rem;
